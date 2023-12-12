@@ -13,14 +13,16 @@ class DetailRestaurantPage extends StatefulWidget {
 }
 
 class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
+  bool isLiked = false;
+
   @override
   Widget build(BuildContext context) {
-    bool isLiked = false;
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (context, isScorlled) {
           return [
             SliverAppBar(
+              backgroundColor: colorGray400,
               pinned: true,
               collapsedHeight: 100,
               automaticallyImplyLeading: false,
@@ -30,8 +32,19 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
                   Hero(
                     tag: widget.restaurant.pictureId,
                     child: Container(
-                      height: 458,
+                      height: 490,
                       decoration: BoxDecoration(
+                        boxShadow: const [
+                          BoxShadow(
+                            color: colorGray500,
+                            offset: Offset(
+                              5.0,
+                              5.0,
+                            ),
+                            blurRadius: 10.0,
+                            spreadRadius: 2.0,
+                          ), //Box
+                        ],
                         image: DecorationImage(
                           image: NetworkImage(
                             widget.restaurant.pictureId,
@@ -78,8 +91,28 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
                               onTap: () {
                                 setState(() {
                                   isLiked = !isLiked;
+                                  if (isLiked) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Restaurant "${widget.restaurant.name}" ditambahkan kedalam daftar suka.'),
+                                        duration: const Duration(
+                                          milliseconds: 800,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Restaurant "${widget.restaurant.name}" dihapus dari daftar suka.'),
+                                        duration: const Duration(
+                                          milliseconds: 800,
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 });
-                                print(isLiked);
                               },
                               child: Container(
                                 height: 36,

@@ -13,14 +13,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Future<List<Restaurant>> getRestaurant() async {
-    String fetch = await DefaultAssetBundle.of(context)
-        .loadString('assets/data_restaurants/restaurants.json');
+    try {
+      String fetch = await DefaultAssetBundle.of(context)
+          .loadString('assets/data_restaurants/restaurants.json');
 
-    RestaurantsResponseModel dataResponse =
-        RestaurantsResponseModel.fromRawJson(fetch);
+      RestaurantsResponseModel dataResponse =
+          RestaurantsResponseModel.fromRawJson(fetch);
 
-    List<Restaurant> dataRestaurant = dataResponse.restaurants;
-    return dataRestaurant;
+      List<Restaurant> dataRestaurant = dataResponse.restaurants;
+      return dataRestaurant;
+    } catch (e) {
+      return [];
+    }
   }
 
   @override
