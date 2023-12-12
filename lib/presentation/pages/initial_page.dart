@@ -27,7 +27,7 @@ class _InitialPageState extends State<InitialPage> {
             border: Border(
                 top: BorderSide(
           color: colorGray200,
-          width: 1.0,
+          width: 2.0,
         ))),
         child: BottomNavigationBar(
           showSelectedLabels: false,
