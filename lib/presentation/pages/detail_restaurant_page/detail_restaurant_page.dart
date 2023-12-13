@@ -219,6 +219,8 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
                           widget.restaurant.description,
                           style: body1reg,
                           textAlign: TextAlign.justify,
+                          maxLines: 5,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
