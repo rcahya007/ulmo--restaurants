@@ -97,33 +97,44 @@ class _HomePageState extends State<HomePage> {
             FutureBuilder<List<Restaurant>>(
               future: getRestaurant(),
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<Restaurant> restaurants = snapshot.data!;
-                  String type = 'story';
-                  return StoryRestaurants(restaurants: restaurants, type: type);
-                } else {
-                  return const SizedBox(
-                    height: 104,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
+                } else {
+                  if (snapshot.hasData) {
+                    List<Restaurant> restaurants = snapshot.data!;
+                    String type = 'story';
+                    return StoryRestaurants(
+                        restaurants: restaurants, type: type);
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(snapshot.error.toString()),
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                 }
               },
             ),
             FutureBuilder<List<Restaurant>>(
               future: getRestaurant(),
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<Restaurant> restaurants = snapshot.data!;
-                  return CardRestaurants(restaurants: restaurants);
-                } else {
-                  return const SizedBox(
-                    height: 104,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
+                } else {
+                  if (snapshot.hasData) {
+                    List<Restaurant> restaurants = snapshot.data!;
+                    return CardRestaurants(restaurants: restaurants);
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(snapshot.error.toString()),
+                    );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                 }
               },
             ),

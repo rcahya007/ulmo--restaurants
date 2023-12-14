@@ -14,6 +14,7 @@ class DetailRestaurantPage extends StatefulWidget {
 
 class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
   bool isLiked = false;
+  bool isShowMore = false;
 
   @override
   Widget build(BuildContext context) {
@@ -215,12 +216,74 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
                         const SizedBox(
                           height: 16,
                         ),
-                        Text(
-                          widget.restaurant.description,
-                          style: body1reg,
-                          textAlign: TextAlign.justify,
-                          maxLines: 5,
-                          overflow: TextOverflow.ellipsis,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            AnimatedCrossFade(
+                              duration: const Duration(milliseconds: 400),
+                              crossFadeState: isShowMore
+                                  ? CrossFadeState.showSecond
+                                  : CrossFadeState.showFirst,
+                              firstChild: Text(
+                                widget.restaurant.description,
+                                style: body1reg,
+                                textAlign: TextAlign.justify,
+                                maxLines: 5,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              secondChild: Text(
+                                widget.restaurant.description,
+                                style: body1reg,
+                                textAlign: TextAlign.justify,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 8,
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorGray300,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    isShowMore = !isShowMore;
+                                  });
+                                },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      isShowMore ? 'Read Less' : 'Read More',
+                                      style: body2reg.copyWith(
+                                        color: colorBlack,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    AnimatedRotation(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      turns: isShowMore ? 0.5 : 0,
+                                      child: const Icon(
+                                        Icons.expand_circle_down_outlined,
+                                        color: colorBlack,
+                                        size: 18,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
