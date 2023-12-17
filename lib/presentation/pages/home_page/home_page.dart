@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ulmo_restaurants/domain/entities/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
+import 'package:ulmo_restaurants/presentation/pages/search_page/search_page.dart';
 import 'package:ulmo_restaurants/presentation/widgets/card_restaurants.dart';
 import 'package:ulmo_restaurants/presentation/widgets/story_restaurants.dart';
 
@@ -80,6 +81,14 @@ class _HomePageState extends State<HomePage> {
                   vertical: 16,
                 ),
                 child: TextField(
+                  readOnly: true,
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SearchPage(),
+                        ));
+                  },
                   decoration: InputDecoration(
                     hintText: 'Search',
                     hintStyle: body1reg.copyWith(
