@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
+import 'package:ulmo_restaurants/domain/entities/search_result_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
-import 'package:ulmo_restaurants/presentation/provider/list_of_search.dart';
+import 'package:ulmo_restaurants/provider/list_of_search.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -13,113 +15,214 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   TextEditingController searchC = TextEditingController(text: "");
   bool isFocus = true;
+
   @override
   Widget build(BuildContext context) {
+    final listOfSearch = Provider.of<ListOfSearchProvider>(context);
+
     return Scaffold(
       body: SafeArea(
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: colorGray100,
-              ),
+          child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
+                horizontal: 16,
+                vertical: 8,
               ),
-              child: TextField(
-                controller: searchC,
-                autofocus: true,
-                onTap: () {},
-                onChanged: (value) {
-                  setState(() {
-                    searchC.text = value;
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: 'Search restaurant',
-                  hintStyle: body1reg.copyWith(
-                    color: colorGray500,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: colorGray100,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                child: TextField(
+                  controller: searchC,
+                  autofocus: true,
+                  onSubmitted: (value) {
+                    if (value != "") {
+                      listOfSearch.addToSearch(value);
+                    }
+                  },
+                  onTap: () {},
+                  onChanged: (value) {
+                    setState(() {
+                      searchC.text = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Search restaurant',
+                    hintStyle: body1reg.copyWith(
+                      color: colorGray500,
+                    ),
+                    border: InputBorder.none,
+                    icon: const Icon(
+                      Icons.search,
+                      size: 24,
+                    ),
+                    suffixIcon: searchC.text == ""
+                        ? const Icon(
+                            Icons.mic,
+                          )
+                        : const Icon(
+                            Icons.cancel_outlined,
+                          ),
                   ),
-                  border: InputBorder.none,
-                  icon: const Icon(
-                    Icons.search,
-                    size: 24,
-                  ),
-                  suffixIcon: searchC.text == ""
-                      ? const Icon(
-                          Icons.mic,
-                        )
-                      : const Icon(
-                          Icons.cancel_outlined,
-                        ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 8,
-            ),
-            child: Consumer<ListOfSearchProvider>(
-              builder: (context, value, child) {
-                if (value.historySearch.isEmpty) {
-                  print('test');
-                  return const SizedBox(
-                    height: 0,
-                  );
-                } else {
-                  print('test');
-                  return ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: value.historySearch.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 20,
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.schedule,
-                              size: 24,
-                            ),
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            Expanded(
-                              child: Text(
-                                value.historySearch[index],
-                                style: body1reg,
+            searchC.text == ""
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                    ),
+                    child: Consumer<ListOfSearchProvider>(
+                      builder: (context, value, child) {
+                        if (value.historySearch.isEmpty) {
+                          return const SizedBox(
+                            height: 0,
+                          );
+                        } else {
+                          return Column(
+                            children: value.showLastHistory
+                                .map((e) => Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 20,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.schedule, size: 24),
+                                          const SizedBox(
+                                            width: 16,
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              e,
+                                              style: body1reg,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 16,
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              value.removeSearch(e);
+                                            },
+                                            child: const Icon(
+                                              Icons.cancel_outlined,
+                                              color: colorGray500,
+                                              size: 24,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ))
+                                .toList(),
+                          );
+                        }
+                      },
+                    ),
+                  )
+                : FutureBuilder<SearchRestaurantResult>(
+                    future: ApiRestaurant().searchResult(searchC.text),
+                    builder: (context, snapshot) {
+                      var state = snapshot.connectionState;
+                      switch (state) {
+                        case ConnectionState.none:
+                        case ConnectionState.active:
+                        case ConnectionState.waiting:
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(
+                                16,
                               ),
+                              child: CircularProgressIndicator(),
                             ),
-                            const SizedBox(
-                              width: 16,
+                          );
+                        case ConnectionState.done:
+                          if (snapshot.hasData) {
+                            if (snapshot.data!.restaurants.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(
+                                  16,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Tidak ada restaurant',
+                                    style: body0med,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    child: Text(
+                                      'Restaurant',
+                                      style: body0med,
+                                    ),
+                                  ),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount:
+                                        snapshot.data?.restaurants.length,
+                                    itemBuilder: (context, index) {
+                                      var restaurantName =
+                                          snapshot.data?.restaurants[index];
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 20,
+                                        ),
+                                        child: Text(restaurantName!.name),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            }
+                          } else if (snapshot.hasError) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 20,
+                              ),
+                              child: const Text(
+                                  'An error occurred... try searching for the restaurant again'),
+                            );
+                          } else {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 20,
+                              ),
+                              child: const Text(''),
+                            );
+                          }
+                        default:
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 20,
                             ),
-                            const Icon(
-                              Icons.cancel_outlined,
-                              color: colorGray500,
-                              size: 24,
-                            ),
-                          ],
-                        ),
-                      );
+                            child: const Text(''),
+                          );
+                      }
                     },
-                  );
-                }
-              },
-            ),
-          ),
-        ],
+                  ),
+          ],
+        ),
       )),
     );
   }

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:ulmo_restaurants/presentation/extensions/route_name.dart';
 import 'package:ulmo_restaurants/presentation/pages/initial_page.dart';
 import 'package:ulmo_restaurants/presentation/pages/splash_screen_page.dart';
-import 'package:ulmo_restaurants/presentation/provider/list_of_search.dart';
+import 'package:ulmo_restaurants/provider/list_of_search.dart';
 
 void main() {
   runApp(const MyApp());
