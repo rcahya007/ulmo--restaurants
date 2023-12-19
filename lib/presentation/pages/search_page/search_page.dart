@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:ulmo_restaurants/domain/entities/search_result_response_model.dart';
@@ -68,8 +69,15 @@ class _SearchPageState extends State<SearchPage> {
                         ? const Icon(
                             Icons.mic,
                           )
-                        : const Icon(
-                            Icons.cancel_outlined,
+                        : GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                searchC.clear();
+                              });
+                            },
+                            child: const Icon(
+                              Icons.cancel_outlined,
+                            ),
                           ),
                   ),
                 ),
@@ -151,11 +159,21 @@ class _SearchPageState extends State<SearchPage> {
                                 padding: const EdgeInsets.all(
                                   16,
                                 ),
-                                child: Center(
-                                  child: Text(
-                                    'Tidak ada restaurant',
-                                    style: body0med,
-                                  ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                        'assets/icons/dissatisfied.svg'),
+                                    const SizedBox(
+                                      height: 16,
+                                    ),
+                                    Text(
+                                      'nothing found restaurant, try something else',
+                                      style: heading2semi,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
                               );
                             } else {
