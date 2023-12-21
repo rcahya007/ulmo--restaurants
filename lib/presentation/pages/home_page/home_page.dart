@@ -1,39 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:ulmo_restaurants/domain/entities/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/presentation/pages/search_page/search_page.dart';
 import 'package:ulmo_restaurants/presentation/widgets/card_restaurants.dart';
 import 'package:ulmo_restaurants/presentation/widgets/story_restaurants.dart';
+import 'package:ulmo_restaurants/provider/list_of_search.dart';
+import 'package:ulmo_restaurants/provider/restaurant_provider.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  Future<List<Restaurant>> getRestaurant() async {
-    try {
-      String fetch = await DefaultAssetBundle.of(context)
-          .loadString('assets/data_restaurants/restaurants.json');
-
-      RestaurantsResponseModel dataResponse =
-          RestaurantsResponseModel.fromRawJson(fetch);
-
-      List<Restaurant> dataRestaurant = dataResponse.restaurants;
-      return dataRestaurant;
-    } catch (e) {
-      return [];
-    }
-  }
-
-  @override
-  void initState() {
-    getRestaurant();
-    super.initState();
-  }
-
+  // @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,7 +65,9 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const SearchPage(),
+                          builder: (context) => ChangeNotifierProvider(
+                              create: (context) => ListOfSearchProvider(),
+                              child: const SearchPage()),
                         ));
                   },
                   decoration: InputDecoration(
@@ -103,28 +84,37 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            FutureBuilder<List<Restaurant>>(
-              future: getRestaurant(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
+            Consumer<RestaurantProvider>(
+              builder: (context, value, child) {
+                if (value.state == ResultState.loading) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
-                } else {
-                  if (snapshot.hasData) {
-                    List<Restaurant> restaurants = snapshot.data!;
-                    String type = 'story';
-                    return StoryRestaurants(
-                        restaurants: restaurants, type: type);
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text(snapshot.error.toString()),
-                    );
-                  } else {
-                    return const Center(child: CircularProgressIndicator());
-                  }
                 }
               },
+              child: FutureBuilder<List<Restaurant>>(
+                future: getRestaurant(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    if (snapshot.hasData) {
+                      List<Restaurant> restaurants = snapshot.data!;
+                      String type = 'story';
+                      return StoryRestaurants(
+                          restaurants: restaurants, type: type);
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text(snapshot.error.toString()),
+                      );
+                    } else {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                  }
+                },
+              ),
             ),
             FutureBuilder<List<Restaurant>>(
               future: getRestaurant(),

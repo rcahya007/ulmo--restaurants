@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:ulmo_restaurants/presentation/extensions/route_name.dart';
 import 'package:ulmo_restaurants/presentation/pages/initial_page.dart';
 import 'package:ulmo_restaurants/presentation/pages/splash_screen_page.dart';
-import 'package:ulmo_restaurants/provider/list_of_search.dart';
+import 'package:ulmo_restaurants/provider/restaurant_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => ListOfSearchProvider(),
+      create: (context) => RestaurantProvider(apiRestaurant: ApiRestaurant()),
       child: MaterialApp(
         initialRoute: RouteName.splashScreen,
         routes: {

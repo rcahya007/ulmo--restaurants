@@ -201,9 +201,35 @@ class _SearchPageState extends State<SearchPage> {
                                       return Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 16,
-                                          vertical: 20,
+                                          vertical: 14,
                                         ),
-                                        child: Text(restaurantName!.name),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              height: 36,
+                                              width: 36,
+                                              decoration: const BoxDecoration(
+                                                color: colorGray400,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: CircleAvatar(
+                                                radius: 18,
+                                                backgroundImage: NetworkImage(
+                                                    'https://restaurant-api.dicoding.dev/images/medium/${restaurantName!.pictureId}'),
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              width: 16,
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                restaurantName.name,
+                                                style: body1reg,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       );
                                     },
                                   ),
