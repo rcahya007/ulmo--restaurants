@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
-import 'package:ulmo_restaurants/domain/entities/search_result_response_model.dart';
+import 'package:ulmo_restaurants/data/model/search_result_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/provider/list_of_search.dart';
 

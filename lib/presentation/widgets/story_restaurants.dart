@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ulmo_restaurants/domain/entities/restaurants_response_model.dart';
+import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/presentation/pages/story_page/story_restaurant_page.dart';
 
@@ -50,7 +50,7 @@ class StoryRestaurants extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         image: DecorationImage(
                           image: NetworkImage(
-                            restaurants[index].pictureId,
+                            'https://restaurant-api.dicoding.dev/images/medium/${restaurants[index].pictureId}',
                           ),
                           fit: BoxFit.fill,
                         ),

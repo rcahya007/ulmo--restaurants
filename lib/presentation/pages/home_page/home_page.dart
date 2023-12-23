@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
-import 'package:ulmo_restaurants/domain/entities/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/presentation/pages/search_page/search_page.dart';
 import 'package:ulmo_restaurants/presentation/widgets/card_restaurants.dart';
@@ -84,56 +82,63 @@ class HomePage extends StatelessWidget {
                 ),
               ),
             ),
+            //Story Card
             Consumer<RestaurantProvider>(
               builder: (context, value, child) {
                 if (value.state == ResultState.loading) {
+                  return const SizedBox(
+                    height: 200,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (value.state == ResultState.hasData) {
+                  String type = 'story';
+                  return StoryRestaurants(
+                    restaurants: value.result.restaurants,
+                    type: type,
+                  );
+                } else if (value.state == ResultState.noData) {
+                  return Center(
+                    child: Text(value.message),
+                  );
+                } else if (value.state == ResultState.error) {
+                  return Center(
+                    child: Text(value.message),
+                  );
+                } else {
                   return const Center(
-                    child: CircularProgressIndicator(),
+                    child: Text(''),
                   );
                 }
               },
-              child: FutureBuilder<List<Restaurant>>(
-                future: getRestaurant(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else {
-                    if (snapshot.hasData) {
-                      List<Restaurant> restaurants = snapshot.data!;
-                      String type = 'story';
-                      return StoryRestaurants(
-                          restaurants: restaurants, type: type);
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text(snapshot.error.toString()),
-                      );
-                    } else {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  }
-                },
-              ),
             ),
-            FutureBuilder<List<Restaurant>>(
-              future: getRestaurant(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
+            // Card of Restaurant
+            Consumer<RestaurantProvider>(
+              builder: (context, value, child) {
+                if (value.state == ResultState.loading) {
+                  return const SizedBox(
+                    height: 200,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (value.state == ResultState.hasData) {
+                  return CardRestaurants(
+                    restaurants: value.result.restaurants,
+                  );
+                } else if (value.state == ResultState.noData) {
+                  return Center(
+                    child: Text(value.message),
+                  );
+                } else if (value.state == ResultState.error) {
+                  return Center(
+                    child: Text(value.message),
                   );
                 } else {
-                  if (snapshot.hasData) {
-                    List<Restaurant> restaurants = snapshot.data!;
-                    return CardRestaurants(restaurants: restaurants);
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text(snapshot.error.toString()),
-                    );
-                  } else {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+                  return const Center(
+                    child: Text(''),
+                  );
                 }
               },
             ),

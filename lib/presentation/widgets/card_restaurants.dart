@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:ulmo_restaurants/domain/entities/restaurants_response_model.dart';
+import 'package:provider/provider.dart';
+import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
+import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/presentation/pages/detail_restaurant_page/detail_restaurant_page.dart';
+import 'package:ulmo_restaurants/provider/detail_restaurant.dart';
 
 class CardRestaurants extends StatelessWidget {
+  final List<Restaurant> restaurants;
+
   const CardRestaurants({
     super.key,
     required this.restaurants,
   });
-
-  final List<Restaurant> restaurants;
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +33,12 @@ class CardRestaurants extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DetailRestaurantPage(
-                    restaurant: restaurants[index],
+                  builder: (context) => ChangeNotifierProvider(
+                    create: (context) => DetailRestaurantProvider(
+                      apiRestaurant: ApiRestaurant(),
+                      id: restaurants[index].id,
+                    ),
+                    child: const DetailRestaurantPage(),
                   ),
                 ),
               );
@@ -59,10 +66,8 @@ class CardRestaurants extends StatelessWidget {
                         bottom: 8,
                       ),
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                        mainAxisAlignment:
-                            MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
                             restaurants[index].name,
@@ -74,17 +79,14 @@ class CardRestaurants extends StatelessWidget {
                               RatingBar.builder(
                                 ignoreGestures: true,
                                 itemSize: 20,
-                                initialRating:
-                                    restaurants[index].rating,
+                                initialRating: restaurants[index].rating,
                                 minRating: 1,
                                 direction: Axis.horizontal,
                                 allowHalfRating: true,
                                 itemCount: 5,
                                 itemPadding:
-                                    const EdgeInsets.symmetric(
-                                        horizontal: 1.0),
-                                itemBuilder: (context, _) =>
-                                    const Icon(
+                                    const EdgeInsets.symmetric(horizontal: 1.0),
+                                itemBuilder: (context, _) => const Icon(
                                   Icons.star,
                                   color: Colors.amber,
                                 ),
@@ -104,8 +106,7 @@ class CardRestaurants extends StatelessWidget {
                             height: 4,
                           ),
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Icon(
                                 Icons.location_on_sharp,
@@ -140,7 +141,7 @@ class CardRestaurants extends StatelessWidget {
                         ),
                         image: DecorationImage(
                           image: NetworkImage(
-                            restaurants[index].pictureId,
+                            'https://restaurant-api.dicoding.dev/images/medium/${restaurants[index].pictureId}',
                           ),
                           fit: BoxFit.cover,
                         ),

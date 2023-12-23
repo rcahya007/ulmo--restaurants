@@ -1,3 +1,4 @@
+import 'package:ulmo_restaurants/data/model/detail_restaurant_response_model.dart';
 import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/data/model/search_result_response_model.dart';
 import 'package:http/http.dart' as http;
@@ -20,6 +21,15 @@ class ApiRestaurant {
       return ListRestaurantResponseModel.fromRawJson(getData.body);
     } else {
       throw Exception('Failed to get data list of Restaurant');
+    }
+  }
+
+  Future<DetailRestaurantResponseModel> getDetailRestaurant(String id) async {
+    final getData = await http.get(Uri.parse('$_baseUrl/detail/$id'));
+    if (getData.statusCode == 200) {
+      return DetailRestaurantResponseModel.fromRawJson(getData.body);
+    } else {
+      throw Exception('Failed to get detail data of Restaurant');
     }
   }
 }

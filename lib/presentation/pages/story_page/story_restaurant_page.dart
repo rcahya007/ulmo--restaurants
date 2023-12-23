@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
 
-import 'package:ulmo_restaurants/domain/entities/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 
 class StoryRestaurantPage extends StatelessWidget {
@@ -21,7 +21,7 @@ class StoryRestaurantPage extends StatelessWidget {
             Hero(
               tag: '${dataRestaurant.pictureId}-story',
               child: Image.network(
-                dataRestaurant.pictureId,
+                'https://restaurant-api.dicoding.dev/images/medium/${dataRestaurant.pictureId}',
               ),
             ),
             const SizedBox(
