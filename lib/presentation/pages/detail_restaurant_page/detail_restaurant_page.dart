@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
+import 'package:ulmo_restaurants/data/model/add_review_request_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/presentation/widgets/card_menu.dart';
+import 'package:ulmo_restaurants/provider/add_review_provider.dart';
 import 'package:ulmo_restaurants/provider/detail_restaurant.dart';
 
 class DetailRestaurantPage extends StatefulWidget {
@@ -15,6 +18,8 @@ class DetailRestaurantPage extends StatefulWidget {
 class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
   bool isLiked = false;
   bool isShowMore = false;
+  final TextEditingController nameC = TextEditingController();
+  final TextEditingController reviewC = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -29,337 +34,341 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
               ),
             );
           } else if (value.state == ResultStateDetail.hasData) {
-            return NestedScrollView(
-              headerSliverBuilder: (context, isScorlled) {
-                return [
-                  SliverAppBar(
-                    backgroundColor: colorGray400,
-                    pinned: true,
-                    collapsedHeight: 100,
-                    automaticallyImplyLeading: false,
-                    expandedHeight: 458,
-                    flexibleSpace: Stack(
-                      children: [
-                        Hero(
-                          tag: value.detailRestaurantResponseModel.restaurant
-                              .pictureId,
-                          child: Container(
-                            height: 490,
-                            decoration: BoxDecoration(
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: colorGray500,
-                                  offset: Offset(
-                                    5.0,
-                                    5.0,
+            return ChangeNotifierProvider(
+              create: (context) => AddReviewProvider(
+                apiRestaurant: ApiRestaurant(),
+              ),
+              child: NestedScrollView(
+                headerSliverBuilder: (context, isScorlled) {
+                  return [
+                    SliverAppBar(
+                      backgroundColor: colorGray400,
+                      pinned: true,
+                      collapsedHeight: 100,
+                      automaticallyImplyLeading: false,
+                      expandedHeight: 458,
+                      flexibleSpace: Stack(
+                        children: [
+                          Hero(
+                            tag: value.detailRestaurantResponseModel.restaurant
+                                .pictureId,
+                            child: Container(
+                              height: 490,
+                              decoration: BoxDecoration(
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: colorGray500,
+                                    offset: Offset(
+                                      5.0,
+                                      5.0,
+                                    ),
+                                    blurRadius: 10.0,
+                                    spreadRadius: 2.0,
+                                  ), //Box
+                                ],
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                    'https://restaurant-api.dicoding.dev/images/large/${value.detailRestaurantResponseModel.restaurant.pictureId}',
                                   ),
-                                  blurRadius: 10.0,
-                                  spreadRadius: 2.0,
-                                ), //Box
-                              ],
-                              image: DecorationImage(
-                                image: NetworkImage(
-                                  'https://restaurant-api.dicoding.dev/images/large/${value.detailRestaurantResponseModel.restaurant.pictureId}',
+                                  fit: BoxFit.cover,
                                 ),
-                                fit: BoxFit.cover,
+                                color: colorGray400,
                               ),
-                              color: colorGray400,
                             ),
                           ),
-                        ),
-                        Column(
-                          children: [
-                            const SizedBox(
-                              height: 44,
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Container(
-                                      height: 36,
-                                      width: 36,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: colorWhite,
-                                      ),
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.arrow_back_rounded,
-                                          size: 24,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        isLiked = !isLiked;
-                                        if (isLiked) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                  'Restaurant "${value.detailRestaurantResponseModel.restaurant.name}" ditambahkan kedalam daftar suka.'),
-                                              duration: const Duration(
-                                                milliseconds: 800,
-                                              ),
-                                            ),
-                                          );
-                                        } else {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                  'Restaurant "${value.detailRestaurantResponseModel.restaurant.name}" dihapus dari daftar suka.'),
-                                              duration: const Duration(
-                                                milliseconds: 800,
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      });
-                                    },
-                                    child: Container(
-                                      height: 36,
-                                      width: 36,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: colorWhite,
-                                      ),
-                                      child: Center(
-                                          child: Icon(
-                                        isLiked
-                                            ? Icons.favorite_sharp
-                                            : Icons.favorite_border_sharp,
-                                        size: 24,
-                                      )),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ];
-              },
-              body: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 24,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Column(
                             children: [
-                              Text(
-                                value.detailRestaurantResponseModel.restaurant
-                                    .name,
-                                style: heading1semi,
-                              ),
                               const SizedBox(
-                                height: 16,
+                                height: 44,
                               ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  RatingBar.builder(
-                                    itemSize: 22,
-                                    initialRating: value
-                                        .detailRestaurantResponseModel
-                                        .restaurant
-                                        .rating,
-                                    minRating: 1,
-                                    direction: Axis.horizontal,
-                                    allowHalfRating: true,
-                                    itemCount: 5,
-                                    itemPadding: const EdgeInsets.symmetric(
-                                        horizontal: 1.0),
-                                    itemBuilder: (context, _) => const Icon(
-                                      Icons.star,
-                                      color: Colors.amber,
-                                    ),
-                                    onRatingUpdate: (rating) {},
-                                  ),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  Text(
-                                    '${value.detailRestaurantResponseModel.restaurant.rating}',
-                                    style: body1reg,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.location_on_sharp,
-                                    color: colorYellow500,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      '${value.detailRestaurantResponseModel.restaurant.address}, ${value.detailRestaurantResponseModel.restaurant.city}',
-                                      style: body1reg,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: value.detailRestaurantResponseModel
-                                    .restaurant.categories
-                                    .map(
-                                      (e) => Container(
-                                        margin: const EdgeInsets.only(
-                                          right: 12,
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Container(
+                                        height: 36,
+                                        width: 36,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: colorWhite,
                                         ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 7.5,
-                                        ),
-                                        decoration: BoxDecoration(
-                                            color: colorWhite,
-                                            border: Border.all(
-                                              color: colorBlack,
-                                              width: 1,
-                                            ),
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                              Radius.circular(
-                                                8,
-                                              ),
-                                            ),
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                color: colorBlack,
-                                                blurRadius: 0,
-                                                offset: Offset(2, 2),
-                                              )
-                                            ]),
-                                        child: Text(
-                                          e.name,
-                                          style: body2med,
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.arrow_back_rounded,
+                                            size: 24,
+                                          ),
                                         ),
                                       ),
-                                    )
-                                    .toList(),
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  AnimatedCrossFade(
-                                    duration: const Duration(milliseconds: 400),
-                                    crossFadeState: isShowMore
-                                        ? CrossFadeState.showSecond
-                                        : CrossFadeState.showFirst,
-                                    firstChild: Text(
-                                      value.detailRestaurantResponseModel
-                                          .restaurant.description,
-                                      style: body1reg,
-                                      textAlign: TextAlign.justify,
-                                      maxLines: 5,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    secondChild: Text(
-                                      value.detailRestaurantResponseModel
-                                          .restaurant.description,
-                                      style: body1reg,
-                                      textAlign: TextAlign.justify,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 6,
-                                      horizontal: 16,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colorGray300,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: GestureDetector(
+                                    GestureDetector(
                                       onTap: () {
                                         setState(() {
-                                          isShowMore = !isShowMore;
+                                          isLiked = !isLiked;
+                                          if (isLiked) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                    'Restaurant "${value.detailRestaurantResponseModel.restaurant.name}" ditambahkan kedalam daftar suka.'),
+                                                duration: const Duration(
+                                                  milliseconds: 800,
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                    'Restaurant "${value.detailRestaurantResponseModel.restaurant.name}" dihapus dari daftar suka.'),
+                                                duration: const Duration(
+                                                  milliseconds: 800,
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         });
                                       },
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            isShowMore
-                                                ? 'Read Less'
-                                                : 'Read More',
-                                            style: body2reg.copyWith(
-                                              color: colorBlack,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            maxLines: 1,
-                                          ),
-                                          const SizedBox(
-                                            width: 8,
-                                          ),
-                                          AnimatedRotation(
-                                            duration: const Duration(
-                                                milliseconds: 300),
-                                            turns: isShowMore ? 0.5 : 0,
-                                            child: const Icon(
-                                              Icons.expand_circle_down_outlined,
-                                              color: colorBlack,
-                                              size: 18,
-                                            ),
-                                          )
-                                        ],
+                                      child: Container(
+                                        height: 36,
+                                        width: 36,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: colorWhite,
+                                        ),
+                                        child: Center(
+                                            child: Icon(
+                                          isLiked
+                                              ? Icons.favorite_sharp
+                                              : Icons.favorite_border_sharp,
+                                          size: 24,
+                                        )),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  showDialog(
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ];
+                },
+                body: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 24,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  value.detailRestaurantResponseModel.restaurant
+                                      .name,
+                                  style: heading1semi,
+                                ),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    RatingBar.builder(
+                                      itemSize: 22,
+                                      initialRating: value
+                                          .detailRestaurantResponseModel
+                                          .restaurant
+                                          .rating,
+                                      minRating: 1,
+                                      direction: Axis.horizontal,
+                                      allowHalfRating: true,
+                                      itemCount: 5,
+                                      itemPadding: const EdgeInsets.symmetric(
+                                          horizontal: 1.0),
+                                      itemBuilder: (context, _) => const Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                      ),
+                                      onRatingUpdate: (rating) {},
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    Text(
+                                      '${value.detailRestaurantResponseModel.restaurant.rating}',
+                                      style: body1reg,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.location_on_sharp,
+                                      color: colorYellow500,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        '${value.detailRestaurantResponseModel.restaurant.address}, ${value.detailRestaurantResponseModel.restaurant.city}',
+                                        style: body1reg,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: value.detailRestaurantResponseModel
+                                      .restaurant.categories
+                                      .map(
+                                        (e) => Container(
+                                          margin: const EdgeInsets.only(
+                                            right: 12,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 7.5,
+                                          ),
+                                          decoration: BoxDecoration(
+                                              color: colorWhite,
+                                              border: Border.all(
+                                                color: colorBlack,
+                                                width: 1,
+                                              ),
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                Radius.circular(
+                                                  8,
+                                                ),
+                                              ),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: colorBlack,
+                                                  blurRadius: 0,
+                                                  offset: Offset(2, 2),
+                                                )
+                                              ]),
+                                          child: Text(
+                                            e.name,
+                                            style: body2med,
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    AnimatedCrossFade(
+                                      duration:
+                                          const Duration(milliseconds: 400),
+                                      crossFadeState: isShowMore
+                                          ? CrossFadeState.showSecond
+                                          : CrossFadeState.showFirst,
+                                      firstChild: Text(
+                                        value.detailRestaurantResponseModel
+                                            .restaurant.description,
+                                        style: body1reg,
+                                        textAlign: TextAlign.justify,
+                                        maxLines: 5,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      secondChild: Text(
+                                        value.detailRestaurantResponseModel
+                                            .restaurant.description,
+                                        style: body1reg,
+                                        textAlign: TextAlign.justify,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 8,
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 6,
+                                        horizontal: 16,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorGray300,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            isShowMore = !isShowMore;
+                                          });
+                                        },
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              isShowMore
+                                                  ? 'Read Less'
+                                                  : 'Read More',
+                                              style: body2reg.copyWith(
+                                                color: colorBlack,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                              maxLines: 1,
+                                            ),
+                                            const SizedBox(
+                                              width: 8,
+                                            ),
+                                            AnimatedRotation(
+                                              duration: const Duration(
+                                                  milliseconds: 300),
+                                              turns: isShowMore ? 0.5 : 0,
+                                              child: const Icon(
+                                                Icons
+                                                    .expand_circle_down_outlined,
+                                                color: colorBlack,
+                                                size: 18,
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    showDialog(
                                       context: context,
                                       builder: (context) {
-                                        final TextEditingController nameC =
-                                            TextEditingController();
-                                        final TextEditingController review =
-                                            TextEditingController();
                                         return AlertDialog(
+                                          backgroundColor: colorWhite,
+                                          surfaceTintColor: colorWhite,
                                           insetPadding:
                                               const EdgeInsets.symmetric(
                                             horizontal: 10,
@@ -399,7 +408,7 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
                                                   ],
                                                 ),
                                                 const SizedBox(
-                                                  height: 8,
+                                                  height: 16,
                                                 ),
                                                 Container(
                                                   decoration: BoxDecoration(
@@ -408,99 +417,165 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
                                                         BorderRadius.circular(
                                                             8),
                                                   ),
-                                                  child: const TextField(
+                                                  child: TextField(
+                                                    controller: nameC,
+                                                    style: body1reg,
                                                     decoration: InputDecoration(
-                                                        contentPadding:
-                                                            EdgeInsets
-                                                                .symmetric(
-                                                      vertical: 16,
-                                                      horizontal: 9.5,
-                                                    )),
+                                                      labelText: 'Your name',
+                                                      labelStyle:
+                                                          body2reg.copyWith(
+                                                        color: colorGray500,
+                                                      ),
+                                                      border: InputBorder.none,
+                                                      contentPadding:
+                                                          const EdgeInsets
+                                                              .symmetric(
+                                                        vertical: 9.5,
+                                                        horizontal: 16,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 16,
+                                                ),
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: colorGray100,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  child: TextField(
+                                                    controller: reviewC,
+                                                    style: body1reg,
+                                                    decoration: InputDecoration(
+                                                      labelText: 'Your review',
+                                                      labelStyle:
+                                                          body2reg.copyWith(
+                                                        color: colorGray500,
+                                                      ),
+                                                      border: InputBorder.none,
+                                                      contentPadding:
+                                                          const EdgeInsets
+                                                              .symmetric(
+                                                        vertical: 9.5,
+                                                        horizontal: 16,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 24,
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () {},
+                                                  child: Container(
+                                                    width: double.infinity,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      color: colorYellow400,
+                                                    ),
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 20,
+                                                    ),
+                                                    child: Text(
+                                                      'Send review',
+                                                      style: body1med,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                    ),
                                                   ),
                                                 ),
                                               ],
                                             ),
                                           ),
                                         );
-                                      });
-                                },
-                                child: Container(
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 20,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            'Add New Review',
+                                            style: body1reg,
+                                          ),
+                                        ),
+                                        const Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 20,
+                                          color: colorBlack,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    _showReviews(context, value);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 10,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            'Reviews',
+                                            style: body1reg,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${value.detailRestaurantResponseModel.restaurant.customerReviews.length}',
+                                          style: body1reg.copyWith(
+                                            color: colorGray500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 20,
+                                    vertical: 16,
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          'Add New Review',
-                                          style: body1reg,
-                                        ),
-                                      ),
-                                      const Icon(
-                                        Icons.arrow_forward_ios_rounded,
-                                        size: 20,
-                                        color: colorBlack,
-                                      )
-                                    ],
+                                  child: Text(
+                                    'Menu',
+                                    style: heading2semi,
                                   ),
                                 ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  _showReviews(context, value);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.only(
-                                    bottom: 10,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          'Reviews',
-                                          style: body1reg,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${value.detailRestaurantResponseModel.restaurant.customerReviews.length}',
-                                        style: body1reg.copyWith(
-                                          color: colorGray500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                CardMenu(
+                                  icon: Icons.restaurant_menu_rounded,
+                                  title: 'Foods',
+                                  menu: value.detailRestaurantResponseModel
+                                      .restaurant.menu.foods,
                                 ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
+                                const SizedBox(
+                                  height: 16,
                                 ),
-                                child: Text(
-                                  'Menu',
-                                  style: heading2semi,
+                                CardMenu(
+                                  icon: Icons.local_cafe_rounded,
+                                  title: 'Drinks',
+                                  menu: value.detailRestaurantResponseModel
+                                      .restaurant.menu.drinks,
                                 ),
-                              ),
-                              CardMenu(
-                                icon: Icons.restaurant_menu_rounded,
-                                title: 'Foods',
-                                menu: value.detailRestaurantResponseModel
-                                    .restaurant.menu.foods,
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              CardMenu(
-                                icon: Icons.local_cafe_rounded,
-                                title: 'Drinks',
-                                menu: value.detailRestaurantResponseModel
-                                    .restaurant.menu.drinks,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

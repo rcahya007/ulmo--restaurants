@@ -1,3 +1,5 @@
+import 'package:ulmo_restaurants/data/model/add_review_request_model.dart';
+import 'package:ulmo_restaurants/data/model/add_review_response_model.dart';
 import 'package:ulmo_restaurants/data/model/detail_restaurant_response_model.dart';
 import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/data/model/search_result_response_model.dart';
@@ -30,6 +32,21 @@ class ApiRestaurant {
       return DetailRestaurantResponseModel.fromRawJson(getData.body);
     } else {
       throw Exception('Failed to get detail data of Restaurant');
+    }
+  }
+
+  Future<AddRiviewResponseModel> postReview(AddRiviewRequestModel model) async {
+    final postData = await http.post(
+      Uri.parse('$_baseUrl/review'),
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: model.toJson(),
+    );
+    if (postData.statusCode == 200) {
+      return AddRiviewResponseModel.fromRawJson(postData.body);
+    } else {
+      throw Exception('Failed add your review');
     }
   }
 }
