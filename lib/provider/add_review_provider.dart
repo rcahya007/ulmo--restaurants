@@ -17,7 +17,7 @@ class AddReviewProvider extends ChangeNotifier {
   AddRiviewResponseModel get addRiviewResponseModel => _addRiviewResponseModel;
   ResultState get state => _state;
 
-  Future<dynamic> postReview(AddRiviewRequestModel dataReview) async {
+  void postReview(AddRiviewRequestModel dataReview) async {
     try {
       _state = ResultState.loading;
       notifyListeners();
@@ -25,16 +25,19 @@ class AddReviewProvider extends ChangeNotifier {
       if (postReview.error) {
         _state = ResultState.noData;
         notifyListeners();
-        return _message = postReview.message;
+        _message = postReview.message;
+        print(message);
       } else {
         _state = ResultState.hasData;
         notifyListeners();
-        return _addRiviewResponseModel = postReview;
+        _addRiviewResponseModel = postReview;
+        print(addRiviewResponseModel);
       }
     } catch (e) {
       _state = ResultState.error;
       notifyListeners();
-      return _message = 'Error --> $e';
+      _message = 'Error --> $e';
+      print(message);
     }
   }
 }
