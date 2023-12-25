@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:ulmo_restaurants/data/model/detail_restaurant_response_model.dart';
@@ -35,9 +37,15 @@ class DetailRestaurantProvider extends ChangeNotifier {
         return _detailRestaurantResponseModel = detailRestaurant;
       }
     } catch (e) {
-      _state = ResultStateDetail.error;
-      notifyListeners();
-      return _message = 'Error --> $e';
+      if (e is SocketException) {
+        _state = ResultStateDetail.error;
+        notifyListeners();
+        return _message = 'Check your internet connection';
+      } else {
+        _state = ResultStateDetail.error;
+        notifyListeners();
+        return _message = 'Error --> $e';
+      }
     }
   }
 }

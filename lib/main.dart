@@ -6,6 +6,7 @@ import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:ulmo_restaurants/presentation/extensions/route_name.dart';
 import 'package:ulmo_restaurants/presentation/pages/initial_page.dart';
 import 'package:ulmo_restaurants/presentation/pages/splash_screen_page.dart';
+import 'package:ulmo_restaurants/provider/list_of_search.dart';
 import 'package:ulmo_restaurants/provider/restaurant_provider.dart';
 
 void main() {
@@ -18,12 +19,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => RestaurantProvider(apiRestaurant: ApiRestaurant()),
+      create: (context) => ListOfSearchProvider(),
       child: MaterialApp(
         initialRoute: RouteName.splashScreen,
         routes: {
           RouteName.splashScreen: (context) => const MyHomePage(),
-          RouteName.initialPage: (context) => const InitialPage(),
+          RouteName.initialPage: (context) => ChangeNotifierProvider(
+              create: (context) =>
+                  RestaurantProvider(apiRestaurant: ApiRestaurant()),
+              child: const InitialPage()),
         },
       ),
     );

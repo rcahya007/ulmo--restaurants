@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ulmo_restaurants/data/model/add_review_request_model.dart';
 import 'package:ulmo_restaurants/data/model/add_review_response_model.dart';
 import 'package:ulmo_restaurants/data/model/detail_restaurant_response_model.dart';
@@ -38,12 +40,10 @@ class ApiRestaurant {
   Future<AddRiviewResponseModel> postReview(AddRiviewRequestModel model) async {
     final postData = await http.post(
       Uri.parse('$_baseUrl/review'),
-      headers: {
-        'Content-type': 'application/json',
-      },
-      body: model.toJson(),
+      headers: {'Content-type': 'application/json'},
+      body: jsonEncode(model.toJson()),
     );
-    if (postData.statusCode == 200) {
+    if (postData.statusCode == 201) {
       return AddRiviewResponseModel.fromRawJson(postData.body);
     } else {
       throw Exception('Failed add your review');

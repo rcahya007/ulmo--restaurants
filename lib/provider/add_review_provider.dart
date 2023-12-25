@@ -1,43 +1,50 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:ulmo_restaurants/data/model/add_review_request_model.dart';
 import 'package:ulmo_restaurants/data/model/add_review_response_model.dart';
 
-enum ResultState { loading, noData, hasData, error }
+enum ResultStateAddReview { loading, noData, hasData, error }
 
 class AddReviewProvider extends ChangeNotifier {
   final ApiRestaurant apiRestaurant;
   AddReviewProvider({required this.apiRestaurant});
 
+  // Setter
   late AddRiviewResponseModel _addRiviewResponseModel;
-  late ResultState _state;
+  ResultStateAddReview _state = ResultStateAddReview.noData;
   String _message = '';
 
-  String get message => _message;
+  // Getter
   AddRiviewResponseModel get addRiviewResponseModel => _addRiviewResponseModel;
-  ResultState get state => _state;
+  ResultStateAddReview get state => _state;
+  String get message => _message;
 
-  void postReview(AddRiviewRequestModel dataReview) async {
+  Future<dynamic> postReview(AddRiviewRequestModel dataReview) async {
     try {
-      _state = ResultState.loading;
+      _state = ResultStateAddReview.loading;
       notifyListeners();
       final postReview = await ApiRestaurant().postReview(dataReview);
-      if (postReview.error) {
-        _state = ResultState.noData;
+      if (postReview.error == true) {
+        _state = ResultStateAddReview.noData;
         notifyListeners();
-        _message = postReview.message;
-        print(message);
+        return _message = postReview.message;
       } else {
-        _state = ResultState.hasData;
+        _state = ResultStateAddReview.hasData;
         notifyListeners();
-        _addRiviewResponseModel = postReview;
-        print(addRiviewResponseModel);
+        return _addRiviewResponseModel = postReview;
       }
     } catch (e) {
-      _state = ResultState.error;
-      notifyListeners();
-      _message = 'Error --> $e';
-      print(message);
+      if (e is SocketException) {
+        _state = ResultStateAddReview.error;
+        notifyListeners();
+        return _message = 'Check your internet connection';
+      } else {
+        _state = ResultStateAddReview.error;
+        notifyListeners();
+        return _message = 'Error --> $e';
+      }
     }
   }
 }

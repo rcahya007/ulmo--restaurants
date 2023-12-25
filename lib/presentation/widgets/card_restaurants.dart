@@ -5,6 +5,7 @@ import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/presentation/pages/detail_restaurant_page/detail_restaurant_page.dart';
+import 'package:ulmo_restaurants/provider/add_review_provider.dart';
 import 'package:ulmo_restaurants/provider/detail_restaurant.dart';
 
 class CardRestaurants extends StatelessWidget {
@@ -38,7 +39,10 @@ class CardRestaurants extends StatelessWidget {
                       apiRestaurant: ApiRestaurant(),
                       id: restaurants[index].id,
                     ),
-                    child: const DetailRestaurantPage(),
+                    child: ChangeNotifierProvider(
+                        create: (context) =>
+                            AddReviewProvider(apiRestaurant: ApiRestaurant()),
+                        child: const DetailRestaurantPage()),
                   ),
                 ),
               );
