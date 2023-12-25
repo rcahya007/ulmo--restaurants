@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                               ));
                         },
                         decoration: InputDecoration(
-                          hintText: 'Search',
+                          hintText: 'Search restaurant',
                           hintStyle: body1reg.copyWith(
                             color: colorGray500,
                           ),
