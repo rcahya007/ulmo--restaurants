@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
+import 'package:ulmo_restaurants/data/model/restaurant_local_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/presentation/pages/detail_restaurant_page/detail_restaurant_page.dart';
 import 'package:ulmo_restaurants/provider/add_review_provider.dart';
+import 'package:ulmo_restaurants/provider/db_provider.dart';
 import 'package:ulmo_restaurants/provider/detail_restaurant.dart';
 import 'package:ulmo_restaurants/provider/list_of_search.dart';
 import 'package:ulmo_restaurants/provider/search_restaurant_provider.dart';
@@ -102,6 +104,9 @@ class _SearchPageState extends State<SearchPage> {
                                                 onTap: () {
                                                   setState(() {
                                                     searchC.text = e;
+                                                    searchRestaurant
+                                                        .searchRestaurant(
+                                                            searchC.text);
                                                   });
                                                 },
                                                 child: Container(
@@ -207,29 +212,45 @@ class _SearchPageState extends State<SearchPage> {
                                             var restaurantName = value
                                                 .restaurantResult
                                                 .restaurants[index];
+
+                                            final restaurantLocal =
+                                                Provider.of<DbProvider>(
+                                              context,
+                                            ).getRestaurantById(
+                                                    restaurantName.id);
+
+                                            RestaurantLocalModel? data;
+                                            restaurantLocal
+                                                .then((value) => data = value);
                                             return GestureDetector(
                                               onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ChangeNotifierProvider(
-                                                      create: (context) =>
-                                                          DetailRestaurantProvider(
-                                                        apiRestaurant:
-                                                            ApiRestaurant(),
-                                                        id: restaurantName.id,
+                                                setState(() {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          ChangeNotifierProvider(
+                                                        create: (context) =>
+                                                            DetailRestaurantProvider(
+                                                          apiRestaurant:
+                                                              ApiRestaurant(),
+                                                          id: restaurantName.id,
+                                                        ),
+                                                        child:
+                                                            ChangeNotifierProvider(
+                                                                create: (context) =>
+                                                                    AddReviewProvider(
+                                                                        apiRestaurant:
+                                                                            ApiRestaurant()),
+                                                                child:
+                                                                    DetailRestaurantPage(
+                                                                  restaurantLocalModel:
+                                                                      data,
+                                                                )),
                                                       ),
-                                                      child: ChangeNotifierProvider(
-                                                          create: (context) =>
-                                                              AddReviewProvider(
-                                                                  apiRestaurant:
-                                                                      ApiRestaurant()),
-                                                          child:
-                                                              const DetailRestaurantPage()),
                                                     ),
-                                                  ),
-                                                );
+                                                  );
+                                                });
                                               },
                                               child: Container(
                                                 padding:

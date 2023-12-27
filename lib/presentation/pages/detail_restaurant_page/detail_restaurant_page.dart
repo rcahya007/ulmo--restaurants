@@ -2,24 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:ulmo_restaurants/data/model/add_review_request_model.dart';
+import 'package:ulmo_restaurants/data/model/restaurant_local_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/presentation/pages/no_connection_page/no_connection_page.dart';
 import 'package:ulmo_restaurants/presentation/widgets/card_menu.dart';
 import 'package:ulmo_restaurants/provider/add_review_provider.dart';
+import 'package:ulmo_restaurants/provider/db_provider.dart';
 import 'package:ulmo_restaurants/provider/detail_restaurant.dart';
 
 class DetailRestaurantPage extends StatefulWidget {
-  const DetailRestaurantPage({super.key});
+  final RestaurantLocalModel? restaurantLocalModel;
+  const DetailRestaurantPage({super.key, this.restaurantLocalModel});
 
   @override
   State<DetailRestaurantPage> createState() => _DetailRestaurantPageState();
 }
 
 class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
-  bool isLiked = false;
+  bool? isLiked;
   bool isShowMore = false;
   final TextEditingController nameC = TextEditingController();
   final TextEditingController reviewC = TextEditingController();
+  @override
+  void initState() {
+    if (widget.restaurantLocalModel == null) {
+      isLiked = false;
+    } else {
+      isLiked = true;
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,10 +118,37 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
                                     ),
                                   ),
                                   GestureDetector(
-                                    onTap: () {
+                                    onTap: () async {
                                       setState(() {
-                                        isLiked = !isLiked;
-                                        if (isLiked) {
+                                        isLiked = !isLiked!;
+                                        if (widget.restaurantLocalModel ==
+                                            null) {
+                                          final restaurantLocal =
+                                              RestaurantLocalModel(
+                                            id: value
+                                                .detailRestaurantResponseModel
+                                                .restaurant
+                                                .id,
+                                            name: value
+                                                .detailRestaurantResponseModel
+                                                .restaurant
+                                                .name,
+                                            pictureId: value
+                                                .detailRestaurantResponseModel
+                                                .restaurant
+                                                .pictureId,
+                                            city: value
+                                                .detailRestaurantResponseModel
+                                                .restaurant
+                                                .city,
+                                            rating: value
+                                                .detailRestaurantResponseModel
+                                                .restaurant
+                                                .rating,
+                                          );
+                                          Provider.of<DbProvider>(context,
+                                                  listen: false)
+                                              .addRestaurant(restaurantLocal);
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             SnackBar(
@@ -121,6 +160,12 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
                                             ),
                                           );
                                         } else {
+                                          Provider.of<DbProvider>(context,
+                                                  listen: false)
+                                              .deleteRestaurant(value
+                                                  .detailRestaurantResponseModel
+                                                  .restaurant
+                                                  .id);
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             SnackBar(
@@ -143,7 +188,7 @@ class _DetailRestaurantPageState extends State<DetailRestaurantPage> {
                                       ),
                                       child: Center(
                                           child: Icon(
-                                        isLiked
+                                        isLiked!
                                             ? Icons.favorite_sharp
                                             : Icons.favorite_border_sharp,
                                         size: 24,
