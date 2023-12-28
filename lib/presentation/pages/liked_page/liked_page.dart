@@ -3,7 +3,6 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
-import 'package:ulmo_restaurants/data/model/restaurant_local_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
 import 'package:ulmo_restaurants/presentation/pages/detail_restaurant_page/detail_restaurant_page.dart';
 import 'package:ulmo_restaurants/provider/add_review_provider.dart';
@@ -97,156 +96,217 @@ class LikedPage extends StatelessWidget {
                 ],
               );
             } else {
-              return Padding(
-                padding: const EdgeInsets.only(
-                  top: 16,
-                  left: 16,
-                  right: 16,
-                ),
-                child: ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: restaurantLocal.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () async {
-                        // final data =
-                        //     value.getRestaurantById(restaurantLocal[index].id!);
-                        // RestaurantLocalModel? dataRestaurant;
-                        // data.then((value) => dataRestaurant = value);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChangeNotifierProvider(
-                              create: (context) => DetailRestaurantProvider(
-                                apiRestaurant: ApiRestaurant(),
-                                id: restaurantLocal[index].id!,
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      height: 56,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        bottom: 16,
+                      ),
+                      child: Text(
+                        'saved restaurant',
+                        style: heading1semi,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                      ),
+                      child: ListView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: restaurantLocal.length,
+                        itemBuilder: (context, index) {
+                          return Dismissible(
+                            key: Key(restaurantLocal[index].id!),
+                            background: Container(
+                              margin: const EdgeInsets.only(
+                                bottom: 16,
                               ),
-                              child: ChangeNotifierProvider(
-                                  create: (context) => AddReviewProvider(
-                                      apiRestaurant: ApiRestaurant()),
-                                  child: DetailRestaurantPage(
-                                    restaurantLocalModel:
-                                        restaurantLocal[index],
-                                  )),
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(
-                          bottom: 16,
-                        ),
-                        height: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(
-                            8,
-                          ),
-                          color: colorGray100,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 8,
-                                  left: 16,
-                                  right: 16,
-                                  bottom: 8,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  8,
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                                color: colorGray500,
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(right: 16),
+                                    child: Icon(
+                                      Icons.delete_forever,
+                                      size: 30,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            onDismissed: (direction) {
+                              Provider.of<DbProvider>(
+                                context,
+                                listen: false,
+                              ).deleteRestaurant(restaurantLocal[index].id!);
+                            },
+                            child: GestureDetector(
+                              onTap: () async {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ChangeNotifierProvider(
+                                      create: (context) =>
+                                          DetailRestaurantProvider(
+                                        apiRestaurant: ApiRestaurant(),
+                                        id: restaurantLocal[index].id!,
+                                      ),
+                                      child: ChangeNotifierProvider(
+                                          create: (context) =>
+                                              AddReviewProvider(
+                                                  apiRestaurant:
+                                                      ApiRestaurant()),
+                                          child: DetailRestaurantPage(
+                                            restaurantLocalModel:
+                                                restaurantLocal[index],
+                                          )),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(
+                                  bottom: 16,
+                                ),
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                    8,
+                                  ),
+                                  color: colorGray100,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      restaurantLocal[index].name!,
-                                      style: heading2semi,
-                                      overflow: TextOverflow.ellipsis,
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 8,
+                                          left: 16,
+                                          right: 16,
+                                          bottom: 8,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              restaurantLocal[index].name!,
+                                              style: heading2semi,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Row(
+                                              children: [
+                                                RatingBar.builder(
+                                                  ignoreGestures: true,
+                                                  itemSize: 20,
+                                                  initialRating:
+                                                      restaurantLocal[index]
+                                                          .rating!,
+                                                  minRating: 1,
+                                                  direction: Axis.horizontal,
+                                                  allowHalfRating: true,
+                                                  itemCount: 5,
+                                                  itemPadding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 1.0),
+                                                  itemBuilder: (context, _) =>
+                                                      const Icon(
+                                                    Icons.star,
+                                                    color: Colors.amber,
+                                                  ),
+                                                  onRatingUpdate: (rating) {},
+                                                ),
+                                                const SizedBox(
+                                                  width: 8,
+                                                ),
+                                                Text(
+                                                  '${restaurantLocal[index].rating}',
+                                                  style: body2reg,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 4,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(
+                                                  Icons.location_on_sharp,
+                                                  color: colorYellow500,
+                                                  size: 20,
+                                                ),
+                                                const SizedBox(
+                                                  width: 8,
+                                                ),
+                                                Expanded(
+                                                  child: Text(
+                                                    restaurantLocal[index]
+                                                        .city!,
+                                                    style: body2reg,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                    Row(
-                                      children: [
-                                        RatingBar.builder(
-                                          ignoreGestures: true,
-                                          itemSize: 20,
-                                          initialRating:
-                                              restaurantLocal[index].rating!,
-                                          minRating: 1,
-                                          direction: Axis.horizontal,
-                                          allowHalfRating: true,
-                                          itemCount: 5,
-                                          itemPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 1.0),
-                                          itemBuilder: (context, _) =>
-                                              const Icon(
-                                            Icons.star,
-                                            color: Colors.amber,
+                                    Hero(
+                                      tag: restaurantLocal[index].pictureId!,
+                                      child: Container(
+                                        width: 82,
+                                        decoration: BoxDecoration(
+                                          color: colorGray400,
+                                          borderRadius: const BorderRadius.only(
+                                            topRight: Radius.circular(8),
+                                            bottomRight: Radius.circular(8),
                                           ),
-                                          onRatingUpdate: (rating) {},
-                                        ),
-                                        const SizedBox(
-                                          width: 8,
-                                        ),
-                                        Text(
-                                          '${restaurantLocal[index].rating}',
-                                          style: body2reg,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(
-                                      height: 4,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.location_on_sharp,
-                                          color: colorYellow500,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(
-                                          width: 8,
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            restaurantLocal[index].city!,
-                                            style: body2reg,
-                                            overflow: TextOverflow.ellipsis,
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                              'https://restaurant-api.dicoding.dev/images/medium/${restaurantLocal[index].pictureId}',
+                                            ),
+                                            fit: BoxFit.cover,
                                           ),
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                            Hero(
-                              tag: restaurantLocal[index].pictureId!,
-                              child: Container(
-                                width: 82,
-                                decoration: BoxDecoration(
-                                  color: colorGray400,
-                                  borderRadius: const BorderRadius.only(
-                                    topRight: Radius.circular(8),
-                                    bottomRight: Radius.circular(8),
-                                  ),
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                      'https://restaurant-api.dicoding.dev/images/medium/${restaurantLocal[index].pictureId}',
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
               );
             }
