@@ -1,12 +1,21 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:ulmo_restaurants/data/model/received_notification.dart';
+import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
+import 'package:http/http.dart' as http;
+import 'package:ulmo_restaurants/data/model/restaurant_local_model.dart';
+import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
+import 'package:ulmo_restaurants/presentation/pages/detail_restaurant_page/detail_restaurant_page.dart';
+import 'package:ulmo_restaurants/provider/add_review_provider.dart';
+import 'package:ulmo_restaurants/provider/db_provider.dart';
+import 'package:ulmo_restaurants/provider/detail_restaurant.dart';
 
-final selectNotificationSubject = BehaviorSubject<String?>();
-final didReceiveLocalNotificationSubject =
-    BehaviorSubject<ReceivedNotification>();
+final selectNotificationSubject = BehaviorSubject<Restaurant?>();
+final didReceiveLocalNotificationSubject = BehaviorSubject<Restaurant>();
 
 class NotificationHelper {
   static const _channelId = "01";
@@ -23,69 +32,84 @@ class NotificationHelper {
   Future<void> initNotifications(
       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
     var initializationSettingsAndroid =
-        const AndroidInitializationSettings('app_icon');
-
-    var initializationSettingsIOS = DarwinInitializationSettings(
-        requestAlertPermission: false,
-        requestBadgePermission: false,
-        requestSoundPermission: false,
-        onDidReceiveLocalNotification:
-            (int id, String? title, String? body, String? payload) async {
-          didReceiveLocalNotificationSubject.add(ReceivedNotification(
-              id: id, title: title, body: body, payload: payload));
-        });
+        const AndroidInitializationSettings('icon_apps');
 
     var initializationSettings = InitializationSettings(
-        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+      android: initializationSettingsAndroid,
+    );
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: (NotificationResponse details) async {
-      final payload = details.payload;
-      if (payload != null) {
-        print('notification payload: $payload');
-      }
-      selectNotificationSubject.add(payload);
-    });
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  void requestIOSPermissions(
-      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) {
-    flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+  Future<String> _downloadAndSaveFile(String url, String fileName) async {
+    var directory = await getApplicationDocumentsDirectory();
+    var filePath = '${directory.path}/$fileName';
+    var response = await http.get(Uri.parse(url));
+    var file = File(filePath);
+    await file.writeAsBytes(response.bodyBytes);
+    return filePath;
   }
 
-  void configureDidReceiveLocalNotificationSubject(
-      BuildContext context, String route) {
-    didReceiveLocalNotificationSubject.stream
-        .listen((ReceivedNotification receivedNotification) async {
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) => CupertinoAlertDialog(
-          title: receivedNotification.title != null
-              ? Text(receivedNotification.title!)
-              : null,
-          content: receivedNotification.body != null
-              ? Text(receivedNotification.body!)
-              : null,
-          actions: [
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              child: const Text('Ok'),
-              onPressed: () async {
-                Navigator.of(context, rootNavigator: true).pop();
-                await Navigator.pushNamed(context, route,
-                    arguments: receivedNotification);
-              },
-            )
-          ],
-        ),
-      );
+  Future<void> showBigPictureNotification(
+      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+      String smallPict,
+      String bigPict,
+      Restaurant dataRestaurant) async {
+    var smallIconPath = await _downloadAndSaveFile(smallPict, 'smallPict');
+    var bigPicturePath = await _downloadAndSaveFile(bigPict, 'bigPict');
+
+    var bigPictureStyleInformation = BigPictureStyleInformation(
+      FilePathAndroidBitmap(bigPicturePath),
+      largeIcon: FilePathAndroidBitmap(smallIconPath),
+      contentTitle: dataRestaurant.name,
+      htmlFormatContentTitle: true,
+      summaryText:
+          'Located in ${dataRestaurant.city} with a rating ${dataRestaurant.rating}',
+      htmlFormatSummaryText: true,
+    );
+
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      _channelId,
+      _channelName,
+      channelDescription: _channelDesc,
+      styleInformation: bigPictureStyleInformation,
+    );
+
+    var platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Ulmo Restaurant',
+      dataRestaurant.name,
+      platformChannelSpecifics,
+      payload: dataRestaurant.id,
+    );
+  }
+
+  void configureSelectNotificationSubject(BuildContext context) {
+    selectNotificationSubject.stream.listen((Restaurant? payload) async {
+      final restaurantLocal = Provider.of<DbProvider>(context, listen: false)
+          .getRestaurantById(payload!.id);
+      RestaurantLocalModel? data;
+      restaurantLocal.then((value) => data = value);
+      await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChangeNotifierProvider(
+              create: (context) => DetailRestaurantProvider(
+                apiRestaurant: ApiRestaurant(),
+                id: payload.id,
+              ),
+              child: ChangeNotifierProvider(
+                create: (context) =>
+                    AddReviewProvider(apiRestaurant: ApiRestaurant()),
+                child: DetailRestaurantPage(
+                  restaurantLocalModel: data,
+                ),
+              ),
+            ),
+          ));
     });
   }
 }

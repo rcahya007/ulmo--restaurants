@@ -48,11 +48,12 @@ class CardRestaurants extends StatelessWidget {
                           id: restaurants[index].id,
                         ),
                         child: ChangeNotifierProvider(
-                            create: (context) => AddReviewProvider(
-                                apiRestaurant: ApiRestaurant()),
-                            child: DetailRestaurantPage(
-                              restaurantLocalModel: data,
-                            )),
+                          create: (context) =>
+                              AddReviewProvider(apiRestaurant: ApiRestaurant()),
+                          child: DetailRestaurantPage(
+                            restaurantLocalModel: data,
+                          ),
+                        ),
                       ),
                     ),
                   );

@@ -10,7 +10,6 @@ import 'package:ulmo_restaurants/presentation/pages/splash_screen_page.dart';
 import 'package:ulmo_restaurants/provider/db_provider.dart';
 import 'package:ulmo_restaurants/provider/list_of_search.dart';
 import 'package:ulmo_restaurants/provider/restaurant_provider.dart';
-import 'package:ulmo_restaurants/provider/scheduling_provider.dart';
 import 'package:ulmo_restaurants/utils/notification_helper.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -20,10 +19,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final NotificationHelper notificationHelper = NotificationHelper();
   await notificationHelper.initNotifications(flutterLocalNotificationsPlugin);
-  notificationHelper.requestIOSPermissions(flutterLocalNotificationsPlugin);
-  // final NotificationHelper notificationHelper = NotificationHelper();
-  // await notificationHelper.initNotifications(flutterLocalNotificationsPlugin);
-  // notificationHelper.requestIOSPermissions(flutterLocalNotificationsPlugin);
   runApp(const MyApp());
 }
 
