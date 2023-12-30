@@ -9,6 +9,7 @@ import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:http/http.dart' as http;
 import 'package:ulmo_restaurants/data/model/restaurant_local_model.dart';
 import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
+import 'package:ulmo_restaurants/presentation/extensions/route_name.dart';
 import 'package:ulmo_restaurants/presentation/pages/detail_restaurant_page/detail_restaurant_page.dart';
 import 'package:ulmo_restaurants/provider/add_review_provider.dart';
 import 'package:ulmo_restaurants/provider/db_provider.dart';
@@ -38,7 +39,9 @@ class NotificationHelper {
       android: initializationSettingsAndroid,
     );
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+    );
   }
 
   Future<String> _downloadAndSaveFile(String url, String fileName) async {
@@ -89,27 +92,32 @@ class NotificationHelper {
 
   void configureSelectNotificationSubject(BuildContext context) {
     selectNotificationSubject.stream.listen((Restaurant? payload) async {
-      final restaurantLocal = Provider.of<DbProvider>(context, listen: false)
-          .getRestaurantById(payload!.id);
-      RestaurantLocalModel? data;
-      restaurantLocal.then((value) => data = value);
-      await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChangeNotifierProvider(
-              create: (context) => DetailRestaurantProvider(
-                apiRestaurant: ApiRestaurant(),
-                id: payload.id,
-              ),
-              child: ChangeNotifierProvider(
-                create: (context) =>
-                    AddReviewProvider(apiRestaurant: ApiRestaurant()),
-                child: DetailRestaurantPage(
-                  restaurantLocalModel: data,
-                ),
-              ),
-            ),
-          ));
+      // final restaurantLocal = Provider.of<DbProvider>(context, listen: false)
+      //     .getRestaurantById(payload!.id);
+      // RestaurantLocalModel? data;
+      // restaurantLocal.then((value) => data = value);
+      // await Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (context) => ChangeNotifierProvider(
+      //         create: (context) => DetailRestaurantProvider(
+      //           apiRestaurant: ApiRestaurant(),
+      //           id: payload.id,
+      //         ),
+      //         child: ChangeNotifierProvider(
+      //           create: (context) =>
+      //               AddReviewProvider(apiRestaurant: ApiRestaurant()),
+      //           child: DetailRestaurantPage(
+      //             restaurantLocalModel: data,
+      //           ),
+      //         ),
+      //       ),
+      //     ));
+      await Navigator.pushNamed(
+        context,
+        RouteName.handleNotif,
+        arguments: payload,
+      );
     });
   }
 }
