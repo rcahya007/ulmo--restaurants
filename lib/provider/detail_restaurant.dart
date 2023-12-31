@@ -8,9 +8,9 @@ enum ResultStateDetail { loading, noData, hasData, error }
 
 class DetailRestaurantProvider extends ChangeNotifier {
   final ApiRestaurant apiRestaurant;
-  String id;
+  String? id;
   DetailRestaurantProvider({required this.apiRestaurant, required this.id}) {
-    _fetchDetailRestaurant();
+    fetchDetailRestaurant(id);
   }
 
   late DetailRestaurantResponseModel _detailRestaurantResponseModel;
@@ -22,11 +22,12 @@ class DetailRestaurantProvider extends ChangeNotifier {
       _detailRestaurantResponseModel;
   ResultStateDetail get state => _state;
 
-  Future<dynamic> _fetchDetailRestaurant() async {
+  Future<dynamic> fetchDetailRestaurant(String? paramId) async {
     try {
       _state = ResultStateDetail.loading;
       notifyListeners();
-      final detailRestaurant = await ApiRestaurant().getDetailRestaurant(id);
+      final detailRestaurant =
+          await ApiRestaurant().getDetailRestaurant(paramId ?? id!);
       if (detailRestaurant.error) {
         _state = ResultStateDetail.noData;
         notifyListeners();
