@@ -1,5 +1,6 @@
-import 'dart:ui';
 import 'dart:isolate';
+import 'dart:math';
+import 'dart:ui';
 
 import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:ulmo_restaurants/main.dart';
@@ -26,15 +27,18 @@ class BackgroundService {
   }
 
   static Future<void> callback() async {
-    print('Alarm fired!');
     final NotificationHelper notificationHelper = NotificationHelper();
     var result = await ApiRestaurant().getRestaurant();
+    Random random = Random();
+    int randomNumber = random.nextInt(result.restaurants.length);
+    var getOneRestaurant = result.restaurants[randomNumber];
+
     await notificationHelper.showBigPictureNotification(
-      flutterLocalNotificationsPlugin,
-      'https://restaurant-api.dicoding.dev/images/small/14',
-      'https://restaurant-api.dicoding.dev/images/large/14',
-      result,
-    );
+        flutterLocalNotificationsPlugin,
+        'https://restaurant-api.dicoding.dev/images/small/${getOneRestaurant.pictureId}',
+        'https://restaurant-api.dicoding.dev/images/large/${getOneRestaurant.pictureId}',
+        getOneRestaurant,
+        );
 
     _uiSendPort ??= IsolateNameServer.lookupPortByName(_isolateName);
     _uiSendPort?.send(null);

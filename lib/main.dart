@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:ulmo_restaurants/common/navigation.dart';
 import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
 import 'package:ulmo_restaurants/data/model/restaurant_local_model.dart';
+import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/route_name.dart';
 import 'package:ulmo_restaurants/presentation/pages/detail_restaurant_page/detail_restaurant_page.dart';
 import 'package:ulmo_restaurants/presentation/pages/initial_page.dart';
@@ -24,9 +25,11 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final NotificationHelper notificationHelper = NotificationHelper();
-  final BackgroundService _service = BackgroundService();
-  _service.initializeIsolate();
+  final BackgroundService service = BackgroundService();
+
+  service.initializeIsolate();
   await AndroidAlarmManager.initialize();
   await notificationHelper.initNotifications(flutterLocalNotificationsPlugin);
   runApp(const MyApp());
@@ -52,11 +55,11 @@ class MyApp extends StatelessWidget {
                   child: const InitialPage(),
                 ),
             RouteName.detailRestaurantPage: (context) {
-              final String? arg =
-                  ModalRoute.of(context)?.settings.arguments as String?;
+              final Restaurant arg =
+                  ModalRoute.of(context)?.settings.arguments as Restaurant;
               return FutureBuilder<RestaurantLocalModel?>(
-                future: arg != null
-                    ? Provider.of<DbProvider>(context).getRestaurantById(arg)
+                future: arg.id.isNotEmpty
+                    ? Provider.of<DbProvider>(context).getRestaurantById(arg.id)
                     : null,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -69,7 +72,7 @@ class MyApp extends StatelessWidget {
                     return ChangeNotifierProvider(
                       create: (context) => DetailRestaurantProvider(
                         apiRestaurant: ApiRestaurant(),
-                        id: arg,
+                        id: arg.id,
                       ),
                       child: ChangeNotifierProvider(
                         create: (context) =>

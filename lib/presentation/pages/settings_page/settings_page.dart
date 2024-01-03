@@ -1,15 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
-import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
-import 'package:ulmo_restaurants/main.dart';
-import 'package:ulmo_restaurants/presentation/extensions/route_name.dart';
-import 'package:ulmo_restaurants/presentation/widgets/custom_dialog.dart';
-import 'package:ulmo_restaurants/provider/restaurant_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ulmo_restaurants/provider/scheduling_provider.dart';
-import 'package:ulmo_restaurants/utils/notification_helper.dart';
 
 class SettingsPage extends StatefulWidget {
   static const String settingsTitle = 'Settings';
@@ -20,20 +12,18 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final NotificationHelper _notificationHelper = NotificationHelper();
+  bool schedule = false;
+  void _loadSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      schedule = prefs.getBool('isScheduleRestaurant') ?? false;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _notificationHelper.configureSelectNotificationSubject(
-      RouteName.detailRestaurantPage,
-    );
-  }
-
-  @override
-  void dispose() {
-    selectNotificationSubject.close();
-    super.dispose();
+    _loadSetting();
   }
 
   @override
@@ -47,54 +37,20 @@ class _SettingsPageState extends State<SettingsPage> {
           create: (context) => SchedulingProvider(),
           child: ListView(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: ButtonTheme(
-                  buttonColor: Colors.grey[300],
-                  minWidth: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black87,
-                      foregroundColor: Colors.grey[300],
-                      minimumSize: const Size(88, 36),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(2)),
-                      ),
-                    ),
-                    onPressed: () async {
-                      // await _notificationHelper.showBigPictureNotification(
-                      //   flutterLocalNotificationsPlugin,
-                      //   'https://restaurant-api.dicoding.dev/images/small/14',
-                      //   'https://restaurant-api.dicoding.dev/images/large/14',
-                      //   Restaurant(
-                      //     id: 'rqdv5juczeskfw1e867',
-                      //     name: 'Melting Pot',
-                      //     description:
-                      //         'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet.',
-                      //     pictureId: '14',
-                      //     city: 'Medan',
-                      //     rating: 4.2,
-                      //   ),
-                      // );
-                    },
-                    child: const Text('Show big picture notification [Android]'),
-                  ),
-                ),
-              ),
               Material(
                 child: ListTile(
-                  title: const Text('Scheduling News'),
+                  title: const Text('Scheduling Restaurant'),
                   trailing: Consumer<SchedulingProvider>(
                     builder: (context, scheduled, _) {
                       return Switch.adaptive(
-                        value: scheduled.isScheduled,
+                        value: schedule,
                         onChanged: (value) async {
-                          if (Platform.isIOS) {
-                            customDialog(context);
-                          } else {
+                          final prefs = await SharedPreferences.getInstance();
+                          prefs.setBool('isScheduleRestaurant', value);
+                          setState(() {
+                            schedule = value;
                             scheduled.scheduledNews(value);
-                          }
+                          });
                         },
                       );
                     },

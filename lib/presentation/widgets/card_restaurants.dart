@@ -2,15 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:ulmo_restaurants/common/navigation.dart';
-import 'package:ulmo_restaurants/data/api/api_restaurant.dart';
-import 'package:ulmo_restaurants/data/model/restaurant_local_model.dart';
 import 'package:ulmo_restaurants/data/model/restaurants_response_model.dart';
 import 'package:ulmo_restaurants/presentation/extensions/route_name.dart';
 import 'package:ulmo_restaurants/presentation/extensions/styles.dart';
-import 'package:ulmo_restaurants/presentation/pages/detail_restaurant_page/detail_restaurant_page.dart';
-import 'package:ulmo_restaurants/provider/add_review_provider.dart';
 import 'package:ulmo_restaurants/provider/db_provider.dart';
-import 'package:ulmo_restaurants/provider/detail_restaurant.dart';
 
 class CardRestaurants extends StatelessWidget {
   final List<Restaurant> restaurants;
@@ -37,29 +32,8 @@ class CardRestaurants extends StatelessWidget {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () async {
-                  final restaurantLocal =
-                      value.getRestaurantById(restaurants[index].id);
-                  RestaurantLocalModel? data;
-                  restaurantLocal.then((value) => data = value);
-                  Navigation.intentWithData(RouteName.detailRestaurantPage, restaurants);
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => ChangeNotifierProvider(
-                  //       create: (context) => DetailRestaurantProvider(
-                  //         apiRestaurant: ApiRestaurant(),
-                  //         id: restaurants[index].id,
-                  //       ),
-                  //       child: ChangeNotifierProvider(
-                  //         create: (context) =>
-                  //             AddReviewProvider(apiRestaurant: ApiRestaurant()),
-                  //         child: DetailRestaurantPage(
-                  //           restaurantLocalModel: data,
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // );
+                  Navigation.intentWithData(
+                      RouteName.detailRestaurantPage, restaurants[index]);
                 },
                 child: Container(
                   margin: const EdgeInsets.only(

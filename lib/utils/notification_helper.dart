@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
@@ -48,52 +47,14 @@ class NotificationHelper {
     return filePath;
   }
 
-  // Future<void> showBigPictureNotification(
-  //     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
-  //     String smallPict,
-  //     String bigPict,
-  //     Restaurant dataRestaurant) async {
-  //   var smallIconPath = await _downloadAndSaveFile(smallPict, 'smallPict');
-  //   var bigPicturePath = await _downloadAndSaveFile(bigPict, 'bigPict');
-
-  //   var bigPictureStyleInformation = BigPictureStyleInformation(
-  //     FilePathAndroidBitmap(bigPicturePath),
-  //     largeIcon: FilePathAndroidBitmap(smallIconPath),
-  //     contentTitle: dataRestaurant.name,
-  //     htmlFormatContentTitle: true,
-  //     summaryText:
-  //         'Located in ${dataRestaurant.city} with a rating ${dataRestaurant.rating}',
-  //     htmlFormatSummaryText: true,
-  //   );
-
-  //   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-  //       _channelId, _channelName,
-  //       channelDescription: _channelDesc,
-  //       styleInformation: bigPictureStyleInformation,
-  //       importance: Importance.max,
-  //       priority: Priority.high,
-  //       ticker: 'ticker');
-
-  //   var platformChannelSpecifics =
-  //       NotificationDetails(android: androidPlatformChannelSpecifics);
-
-  //   await flutterLocalNotificationsPlugin.show(
-  //     int.parse(dataRestaurant.pictureId),
-  //     'Ulmo Restaurant',
-  //     dataRestaurant.name,
-  //     platformChannelSpecifics,
-  //     payload: json.encode(dataRestaurant.toJson()),
-  //   );
-  // }
-
   Future<void> showBigPictureNotification(
       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       String smallPict,
       String bigPict,
-      ListRestaurantResponseModel restaurants) async {
-          var channelId = "01";
-  var channelName = "channel_01";
-  var channelDesc = "dicoding channel";
+      Restaurant restaurants) async {
+    var channelId = "01";
+    var channelName = "channel_01";
+    var channelDesc = "dicoding channel";
 
     var smallIconPath = await _downloadAndSaveFile(smallPict, 'smallPict');
     var bigPicturePath = await _downloadAndSaveFile(bigPict, 'bigPict');
@@ -101,20 +62,22 @@ class NotificationHelper {
     var bigPictureStyleInformation = BigPictureStyleInformation(
       FilePathAndroidBitmap(bigPicturePath),
       largeIcon: FilePathAndroidBitmap(smallIconPath),
-      contentTitle: restaurants.restaurants[0].name,
+      contentTitle: restaurants.name,
       htmlFormatContentTitle: true,
       summaryText:
-          'Located in ${restaurants.restaurants[0].city} with a rating ${restaurants.restaurants[0].rating}',
+          'Located in ${restaurants.city} with a rating ${restaurants.rating}',
       htmlFormatSummaryText: true,
     );
 
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        channelId, channelName,
-        channelDescription: channelDesc,
-        styleInformation: bigPictureStyleInformation,
-        importance: Importance.max,
-        priority: Priority.high,
-        ticker: 'ticker');
+      channelId,
+      channelName,
+      channelDescription: channelDesc,
+      styleInformation: bigPictureStyleInformation,
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
+    );
 
     var platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
@@ -122,22 +85,16 @@ class NotificationHelper {
     await flutterLocalNotificationsPlugin.show(
       0,
       'Ulmo Restaurant',
-      restaurants.restaurants[0].name,
+      restaurants.name,
       platformChannelSpecifics,
-      payload: json.encode(restaurants.toJson()),
+      payload: json.encode(restaurants),
     );
   }
 
   void configureSelectNotificationSubject(String route) {
     selectNotificationSubject.stream.listen((String payload) async {
-      var data = ListRestaurantResponseModel.fromJson(json.decode(payload));
-      var restaurant = data.restaurants[0];
-      Navigation.intentWithData(route, restaurant);
-      // await Navigator.pushNamed(
-      //   context,
-      //   route,
-      //   arguments: payload,
-      // );
+      var data = Restaurant.fromJson(json.decode(payload));
+      Navigation.intentWithData(route, data);
     });
   }
 }
