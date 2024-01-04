@@ -39,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               Material(
                 child: ListTile(
-                  title: const Text('Scheduling Restaurant'),
+                  title: const Text('Restaurant Notification'),
                   trailing: Consumer<SchedulingProvider>(
                     builder: (context, scheduled, _) {
                       return Switch.adaptive(
